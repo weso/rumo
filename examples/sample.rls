@@ -1,0 +1,10 @@
+@prefix : <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+@import r :- turtle { 
+   resource = "sample.ttl"
+}.
+
+good(?name, ?out_score) :- r(?r, :name, ?name), r(?r, :score, ?score), DOUBLE(?score) > $GOOD_SCORE, ?out_score = DOUBLE(?score) .
+
+@export good :- csv { resource = "good.csv", format=(string, double) } .

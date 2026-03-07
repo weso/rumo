@@ -1,0 +1,17 @@
+prefix : <http://example.org/>
+
+:r0 :name "Alice" ;
+    :age 25 ;
+    :score 88.5 .
+:r1 :name "Bob" ;
+    :age 30 ;
+    :score 92.0 .
+:r2 :name "Carol" ;
+    :age 22 ;
+    :score 76.3 .
+:r3 :name "Dave" ;
+    :age 35 ;
+    :score 95.1 .
+:r4 :name "Eve" ;
+    :age 28 ;
+    :score 81.7 .
