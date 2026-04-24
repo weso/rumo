@@ -1,30 +1,24 @@
 # rumo
 
-`rumo` is a Rust library that reads and describes Polars DataFrames. It ships with a CLI binary and Python bindings.
+`rumo` is a Rust library that reads and describes Polars DataFrames and runs rules on them using nemo. 
 
 ## CLI usage
 
-Run against any CSV file:
+Example of how to run rumo against a CSV file:
 
 ```sh
-cargo run --bin rumo -- --file examples/sample.csv
-```
-
-Example output:
-
-```
-DataFrame: 5 rows × 3 columns
-  - name (str)
-  - age (i64)
-  - score (f64)
-```
+cargo run --features rules -- rules --rules examples/sample.rls --data examples/sample.csv --param GOOD_SCORE=90```
 
 ## Python usage
 
 Build and install the Python extension locally:
 
 ```sh
-maturin develop --features python
+python3 -m venv .venv                                                                                                                     
+source .venv/bin/activate
+pip install polars                                                                                                                        
+maturin develop --features python                                                                                                         
+python examples/describe_dataframe.py
 ```
 
 Then use it from Python:

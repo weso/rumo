@@ -4,7 +4,6 @@ Example: describe a Polars DataFrame using rumo.
 Prerequisites:
     maturin develop --features python
 """
-
 import polars as pl
 import rumo
 

@@ -4,6 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "rumo"
+version = "0.1"
 requires-python = ">=3.8"
 dependencies = ["polars>=0.20"]
 
