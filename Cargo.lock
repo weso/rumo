@@ -3400,8 +3400,10 @@ dependencies = [
 name = "rumo"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "clap",
  "nemo",
+ "nemo-physical",
  "polars",
  "pyo3",
  "pyo3-polars",

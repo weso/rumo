@@ -99,47 +99,7 @@ pub fn print_dataframe_info(df: &DataFrame) {
 // ── Python bindings ─────────────────────────────────────────────────────────
 
 #[cfg(feature = "python")]
-mod python {
-    use super::*;
-    use pyo3::prelude::*;
-    use pyo3_polars::PyDataFrame;
-
-    /// Return a string describing the given Polars DataFrame.
-    #[pyfunction]
-    fn describe(py_df: PyDataFrame) -> PyResult<String> {
-        let df: DataFrame = py_df.into();
-        let info = dataframe_info(&df);
-        Ok(format_dataframe_info(&info))
-    }
-
-    /// Print information about the given Polars DataFrame to stdout.
-    #[pyfunction]
-    fn print_info(py_df: PyDataFrame) -> PyResult<()> {
-        let df: DataFrame = py_df.into();
-        print_dataframe_info(&df);
-        Ok(())
-    }
-
-    /// Convert a Polars DataFrame to a Turtle (RDF) string.
-    ///
-    /// Args:
-    ///     df: Polars DataFrame to convert.
-    ///     base_url: Base IRI used as the prefix (e.g. "http://example.org/").
-    ///     row_stem: Local name stem for row subjects (e.g. "r" → :r0, :r1, …).
-    #[pyfunction]
-    fn to_turtle(py_df: PyDataFrame, base_url: &str, row_stem: &str) -> PyResult<String> {
-        let df: DataFrame = py_df.into();
-        Ok(dataframe_to_turtle(&df, base_url, row_stem))
-    }
-
-    #[pymodule]
-    pub fn pyrumo(m: &Bound<'_, PyModule>) -> PyResult<()> {
-        m.add_function(wrap_pyfunction!(describe, m)?)?;
-        m.add_function(wrap_pyfunction!(print_info, m)?)?;
-        m.add_function(wrap_pyfunction!(to_turtle, m)?)?;
-        Ok(())
-    }
-}
+mod python;
 
 #[cfg(feature = "python")]
 pub use python::pyrumo;
