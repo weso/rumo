@@ -215,10 +215,22 @@ cargo test --features rules
 ## Releasing
 
 1. Change `version` in `Cargo.toml`. This is also the version of the Python package.
-2. Publish a GitHub release. The tag must be the version, for example `v0.2.0`.
+2. Run `cargo check` to update `Cargo.lock`.
+3. Commit and push these changes.
+4. Publish a GitHub release. The tag must be the version with a `v` before it, for example `v0.2.0`.
 
 The `Binaries` workflow attaches the command-line archives to the release.
 The `Python` workflow publishes the `pyrumo` wheels to PyPI.
+
+Each workflow first compares the tag with the version in `Cargo.toml`.
+If they are different, the workflow stops before it builds.
+
+If the check fails, do these steps:
+
+1. Delete the GitHub release.
+2. Delete the tag: `git push --delete origin v0.2.0`.
+3. Change the version in `Cargo.toml`, then commit and push.
+4. Publish the release again.
 
 ## License
 

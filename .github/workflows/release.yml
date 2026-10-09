@@ -13,7 +13,24 @@ permissions:
   contents: write
 
 jobs:
+  version:
+    name: Check version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # On a release, stop before the long builds if the tag and Cargo.toml disagree.
+      - name: Check release tag matches Cargo.toml version
+        if: github.event_name == 'release'
+        run: |
+          version=$(grep -m1 '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          tag="${{ github.event.release.tag_name }}"
+          if [ "${tag#v}" != "$version" ]; then
+            echo "::error::Release tag '$tag' does not match Cargo.toml version '$version'. Bump the version in Cargo.toml, then create the release again."
+            exit 1
+          fi
+
   build:
+    needs: version
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
