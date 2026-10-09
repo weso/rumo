@@ -188,6 +188,9 @@ To read the manual:
 1. Install mdBook: `cargo install mdbook`.
 2. Build and open the manual: `mdbook serve docs --open`.
 
+The `Docs` workflow publishes the manual to GitHub Pages when `docs/` changes on the main branch.
+Before the first publication, set **Settings → Pages → Source** to **GitHub Actions**.
+
 The manual is written in Simplified Technical English.
 
 ## Development

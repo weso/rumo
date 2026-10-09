@@ -70,6 +70,26 @@ The manual uses [mdBook](https://rust-lang.github.io/mdBook/).
    mdbook serve docs --open
    ```
 
+## Publish this manual
+
+The `Docs` workflow (`.github/workflows/docs.yml`) publishes the manual to GitHub Pages.
+
+Before the first publication, do this procedure one time:
+
+1. On GitHub, open the repository settings.
+2. Select **Pages**.
+3. In **Build and deployment**, set **Source** to **GitHub Actions**.
+
+The workflow starts in these conditions:
+
+| Event | Result |
+|-------|--------|
+| A push to `master` or `main` that changes `docs/` | The workflow builds and publishes the manual. |
+| A pull request that changes `docs/` | The workflow builds the manual. It does not publish it. |
+| A manual start from the **Actions** tab | The workflow builds and publishes the manual. |
+
+The manual is then at `https://<owner>.github.io/<repository>/`.
+
 ## Writing style
 
 Write the documentation in Simplified Technical English (ASD-STE100):
