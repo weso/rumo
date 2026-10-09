@@ -1,0 +1,73 @@
+name: Binaries
+
+# Builds the `rumo` CLI (with nemo rule support) for Linux, Windows and macOS.
+# On a published GitHub release the archives are attached to that release;
+# on a manual run they are only kept as workflow artifacts.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-apple-darwin
+            os: macos-15-intel
+          - target: aarch64-apple-darwin
+            os: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Rust toolchain
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - name: Build
+        run: cargo build --release --features rules --target ${{ matrix.target }}
+      - name: Smoke test
+        shell: bash
+        run: |
+          ./target/${{ matrix.target }}/release/rumo rules \
+            --rules examples/sample.rls --data examples/sample.csv --param GOOD_SCORE=90
+      - name: Package
+        id: package
+        shell: bash
+        run: |
+          version="${{ github.event.release.tag_name || github.sha }}"
+          name="rumo_${version}_${{ matrix.target }}"
+          mkdir "$name"
+          cp README.md LICENSE "$name/"
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            cp "target/${{ matrix.target }}/release/rumo.exe" "$name/"
+            7z a "$name.zip" "$name" > /dev/null
+            echo "archive=$name.zip" >> "$GITHUB_OUTPUT"
+          else
+            cp "target/${{ matrix.target }}/release/rumo" "$name/"
+            tar czf "$name.tar.gz" "$name"
+            echo "archive=$name.tar.gz" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rumo-${{ matrix.target }}
+          path: ${{ steps.package.outputs.archive }}
+      - name: Attach to release
+        if: github.event_name == 'release'
+        shell: bash
+        run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.package.outputs.archive }}" --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

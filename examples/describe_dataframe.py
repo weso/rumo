@@ -2,10 +2,10 @@
 Example: describe a Polars DataFrame using rumo.
 
 Prerequisites:
-    maturin develop --features python
+    maturin develop
 """
 import polars as pl
-import rumo
+import pyrumo
 
 df = pl.DataFrame({
     "name":  ["Alice", "Bob", "Carol", "Dave"],
@@ -13,4 +13,4 @@ df = pl.DataFrame({
     "score": [88.5, 92.0, 76.3, 95.1],
 })
 
-print(rumo.describe(df))
+print(pyrumo.describe(df))

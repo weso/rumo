@@ -1,0 +1,154 @@
+name: Python
+
+# Builds and tests the `pyrumo` wheels on every push/PR, and publishes them
+# to PyPI when a GitHub release is published.
+#
+# Publishing uses PyPI trusted publishing (configure it at
+# https://pypi.org/manage/account/publishing/ with workflow `python.yml` and
+# environment `pypi`). Alternatively, add a `PYPI_API_TOKEN` repository secret
+# and it will be used instead.
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64
+            os: ubuntu-latest
+          - target: aarch64
+            os: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: "2_28"
+          rust-toolchain: nightly
+          args: --release --out dist
+          sccache: "true"
+      - name: Test wheel
+        shell: bash
+        run: |
+          python -m pip install "$(ls dist/*.whl)[test]"
+          python -m pytest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ matrix.target }}
+          path: dist
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: x64
+          rust-toolchain: nightly
+          args: --release --out dist
+          sccache: "true"
+      - name: Test wheel
+        shell: bash
+        run: |
+          python -m pip install "$(ls dist/*.whl)[test]"
+          python -m pytest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows-x64
+          path: dist
+
+  macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64
+            os: macos-15-intel
+          - target: aarch64
+            os: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          rust-toolchain: nightly
+          args: --release --out dist
+          sccache: "true"
+      - name: Test wheel
+        shell: bash
+        run: |
+          python -m pip install "$(ls dist/*.whl)[test]"
+          python -m pytest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos-${{ matrix.target }}
+          path: dist
+
+  sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: dist
+
+  publish:
+    name: Publish to PyPI
+    if: github.event_name == 'release'
+    needs: [linux, windows, macos, sdist]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check release tag matches Cargo.toml version
+        run: |
+          version=$(grep -m1 '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          tag="${{ github.event.release.tag_name }}"
+          if [ "${tag#v}" != "$version" ]; then
+            echo "::error::Release tag '$tag' does not match Cargo.toml version '$version'"
+            exit 1
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - run: ls -lh dist
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # When this secret is not set it is empty and trusted publishing is used.
+          password: ${{ secrets.PYPI_API_TOKEN }}

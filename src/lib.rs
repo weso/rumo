@@ -133,7 +133,7 @@ mod python {
     }
 
     #[pymodule]
-    pub fn rumo(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    pub fn pyrumo(m: &Bound<'_, PyModule>) -> PyResult<()> {
         m.add_function(wrap_pyfunction!(describe, m)?)?;
         m.add_function(wrap_pyfunction!(print_info, m)?)?;
         m.add_function(wrap_pyfunction!(to_turtle, m)?)?;
@@ -142,7 +142,7 @@ mod python {
 }
 
 #[cfg(feature = "python")]
-pub use python::rumo;
+pub use python::pyrumo;
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 

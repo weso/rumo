@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "DataFrame information library with Python bindings"
 license = "MIT"
+readme = "README.md"
 
 [lib]
 name = "rumo"
@@ -15,7 +16,7 @@ path = "src/main.rs"
 
 [features]
 default = []
-python = ["dep:pyo3", "dep:pyo3-polars", "pyo3/extension-module"]
+python = ["dep:pyo3", "dep:pyo3-polars", "pyo3/extension-module", "pyo3/abi3-py39"]
 rules = ["dep:nemo", "dep:tokio"]
 
 [dependencies]
@@ -23,5 +24,5 @@ polars = { version = "0.53", features = ["csv"] }
 clap = { version = "4", features = ["derive"] }
 pyo3 = { version = "0.27", optional = true }
 pyo3-polars = { version = "0.26", optional = true }
-nemo = { git = "https://github.com/knowsys/nemo", tag = "v0.9.1", optional = true }
+nemo = { git = "https://github.com/knowsys/nemo", tag = "v0.10.1", optional = true }
 tokio = { version = "1", features = ["rt", "macros"], optional = true }

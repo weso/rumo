@@ -21,3 +21,6 @@ target
 #.idea/
 
 .venv/
+# Python
+__pycache__/
+*.pyc
